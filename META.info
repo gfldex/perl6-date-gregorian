@@ -1,0 +1,8 @@
+{
+    "name" : "Date::Gregorian",
+    "version" : "0.0.1",
+    "description" : "Provides arithmetics with Gregorian dates.",
+    "author" : "Wenzel P. P. Peppmeyer",
+    "depends" : [ ],
+    "source-url" : "git://github.com/gfldex/perl6-date-gregorian.git"
+}
