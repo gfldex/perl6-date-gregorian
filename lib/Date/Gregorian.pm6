@@ -39,37 +39,6 @@ my @week_day_names = <Sunday Monday Tuesday Wednesday Thursday Friday Saturday>;
 enum MonthNames (January => 1, February => 2, March => 3, April => 4, May => 5, June => 6, July => 7, August => 8, September => 9, October => 10, November => 11, December => 12);
 enum MonthLength <0 31 28 31 30 31 30 31 31 30 31 30 31>;
 
-class Day {
-  has Int $.year is rw;
-  has Int $.month is rw;
-  has Int $.day is rw;
-
-  method day_of_week(-->Int){
-    my Int $y = $.year;
-    my Int $m = $.month;
-    my Int $d = $.day;
-    my Int @t = 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4;
-    $y-- if $m < 3;
-    return ($y + $y div 4 - $y div 100 + $y div 400 + @t[$m-1] + $d).Int mod 7;
-  }
-
-  method week_day_name(-->Str){
-    return @week_day_names[$.day_of_week];
-  }
-
-  # this max be incorrect if a country changes TZ
-  # TODO: make this work for countries that changed TZ
-  method length_of_month(){
-    return 29 if $.month == 2 && is_leap_year($.year);
-    return MonthLength($.month).key.Int;
-  }
-
-  method length_of_year(){
-    return 365 if !is_leap_year($.year);
-    return 366;
-  }
-}
-
 #  smartmatch against enum NYI  
 #  sub infix:<~~>(Day $d, MonthNames $n){
 #  	return $d.month == $n.Int;
@@ -98,6 +67,37 @@ class Gregorian is export {
 #	   ) is export {
 #   return Day.new(:year($year), :month($month), :day($day));
 #  }
+
+  class Day {
+    has Int $.year is rw;
+    has Int $.month is rw;
+    has Int $.day is rw;
+
+    method day_of_week(-->Int){
+      my Int $y = $.year;
+      my Int $m = $.month;
+      my Int $d = $.day;
+      my Int @t = 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4;
+      $y-- if $m < 3;
+      return ($y + $y div 4 - $y div 100 + $y div 400 + @t[$m-1] + $d).Int mod 7;
+    }
+
+    method week_day_name(-->Str){
+      return @week_day_names[$.day_of_week];
+    }
+
+    # this max be incorrect if a country changes TZ
+    # TODO: make this work for countries that changed TZ
+    method length_of_month(){
+      return 29 if $.month == 2 && is_leap_year($.year);
+      return MonthLength($.month).key.Int;
+    }
+
+    method length_of_year(){
+      return 365 if !is_leap_year($.year);
+      return 366;
+    }
+  } # class Day
 
   method new(Str $s) is export {
     my $m = ISO8601.parse($s);
@@ -140,10 +140,10 @@ multi infix:<+>(Gregorian::Day $d, Gregorian::Months $m) is export {
   my Int $month = $d.month + $m.month mod 12;
   my Int $day = $d.day;
 
-  return Day.new(:year($year), :month($month), :day($day));
+  return Gregorian::Day.new(:year($year), :month($month), :day($day));
 }
 
-multi infix:<+>(Gregodian::Day $d, Gregorian::Days $somedays ) is export {
+multi infix:<+>(Gregorian::Day $d, Gregorian::Days $somedays ) is export {
   my Int $delta = $somedays.day;
   # terribly slow can be made work for countries that changed TZ
 
