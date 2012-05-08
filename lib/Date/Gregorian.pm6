@@ -172,6 +172,36 @@ multi infix:<+>(Gregorian::Day $d, Gregorian::Days $somedays ) is export {
   return $future;
 }
 
+multi infix:<->(Gregorian::Day $d, Gregorian::Days $somedays) is export {
+  my Int $delta = $somedays.day;
+  my Gregorian::Day $past .= new(:year($d.year), :month($d.month), :day($d.day));
+
+  while $delta > 0 {
+    if $past.day == 1 {
+      if $past.month == 1 {
+	$past.year--;
+	$past.month = 12;
+	$past.day = $past.length_of_month;
+	$delta--;
+      } else {
+	$delta -= $past.day;
+	$past.month--;
+	$past.day = $past.length_of_month;
+      }
+    } else {
+      if $delta > $past.day {
+	$delta -= $past.day;
+	$past.day = 1;
+      } else {
+	$past.day -= $delta;
+	$delta = 0;
+      }
+    }
+  }
+
+  return $past;
+}
+
 multi infix:<==>(Gregorian::Day $d1, Gregorian::Day $d2) is export {
   # returns a Junction for now, not sure if Bool might be better
   return $d1.year == $d2.year & $d1.month == $d2.month & $d1.day == $d2.day;
