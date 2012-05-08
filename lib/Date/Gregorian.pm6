@@ -15,26 +15,6 @@ class InvalidISO8601 is Exception {
   method message() { 'Invalid ISO8601 String' }
 }
 
-
-role Periodic { # represents a periodic point in a Calendar
-  method postcircumfix:<[ ]> (**@slice) {...} # --> Date|Any
-}
-
-class Yearly does Periodic {
-  method postcircumfix:<[ ]> (**@slice_of_years) {...};
-}
-
-class Monthly does Periodic {
-  # should provide alternative for leapdays
-  method postcircumfix:<[ ]> (**@slice_of_months) {...};
-}
-
-# how do i express last day in month?
-
-class Weekly does Periodic {
-  method postcircumfix:<[ ]> (**@slice_of_weeks) {...};
-}
-
 my @week_day_names = <Sunday Monday Tuesday Wednesday Thursday Friday Saturday>;
 enum MonthNames (January => 1, February => 2, March => 3, April => 4, May => 5, June => 6, July => 7, August => 8, September => 9, October => 10, November => 11, December => 12);
 enum MonthLength <0 31 28 31 30 31 30 31 31 30 31 30 31>;
@@ -56,7 +36,6 @@ sub month_length(Int $year, Int $month){
   return 29 if $month == 2 & is_leap_year($year);
   return MonthLength($month);
 }
-
 class Gregorian is export {
 #  proto new(|$) is export {*}
 
@@ -72,6 +51,8 @@ class Gregorian is export {
     has Int $.year is rw;
     has Int $.month is rw;
     has Int $.day is rw;
+
+    method ISO8601 { return $.year ~ '-' ~ $.month.fmt('%2d') ~ $.day('%2d') }
 
     method day_of_week(-->Int){
       my Int $y = $.year;
@@ -96,6 +77,37 @@ class Gregorian is export {
     method length_of_year(){
       return 365 if !is_leap_year($.year);
       return 366;
+    }
+
+    method wonky(){
+      # test if we have a day that may not exist this year or in this TZ
+    }
+
+    method yearly(){
+      my Day $cur = self.clone;
+      my $offset = 0;
+      return gather loop {
+	take $cur + years($offset++);
+      }
+    }
+
+    method monthly(:$skip){
+      my Day $cur = self.clone;
+      my $offset = 0;
+      
+      if $skip {
+	return gather loop {
+	  my Day $ret = $cur + months($offset++);
+	  next if $ret.day > $ret.length_of_month;
+	  take $ret;
+	}
+      } else {
+	return gather loop {
+	  my Day $ret = $cur + months($offset++);
+	  $ret.day = $ret.length_of_month if $ret.day > $ret.length_of_month;
+	  take $ret;
+	}
+      }
     }
   } # class Day
 
@@ -128,7 +140,6 @@ sub postfix:<d>(Int $i) is export { return Gregorian::Days.new(:day($i)) }
 
 
 multi infix:<+>(Gregorian::Day $d, Gregorian::Years $y) is export {
-  # beware of the leapyears
   my Int $new_year = $d.year + $y.year;
   my Int $new_day = $d.day;
   $new_day = 28 if $d.month == 2 && $d.day == 29 && !is_leap_year($new_year);
