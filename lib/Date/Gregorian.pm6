@@ -19,11 +19,6 @@ my @week_day_names = <Sunday Monday Tuesday Wednesday Thursday Friday Saturday>;
 enum MonthNames (January => 1, February => 2, March => 3, April => 4, May => 5, June => 6, July => 7, August => 8, September => 9, October => 10, November => 11, December => 12);
 enum MonthLength <0 31 28 31 30 31 30 31 31 30 31 30 31>;
 
-#  smartmatch against enum NYI  
-#  sub infix:<~~>(Day $d, MonthNames $n){
-#  	return $d.month == $n.Int;
-#  }
-
 #TODO have > < >= <= etc pp
 
 sub is_leap_year(Int $year){
@@ -229,6 +224,12 @@ multi infix:<cmp>(Gregorian::Day $d1, Gregorian::Day $d2) is export {
   return Order::Increase if $d1.day < $d1.day;
   return Order::Decrease;
 }
+
+# smartmatch against enum NYI  
+multi infix:<==>(Gregorian::Day $d, MonthNames $n){
+  return $d.month == $n.Int;
+}
+
 
 #my $m = ISO8601.parse('1978-03-01');
 #say $m.Bool;
