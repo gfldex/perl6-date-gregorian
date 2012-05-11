@@ -89,7 +89,7 @@ class Gregorian is export {
     method monthly(:$skip){
       my Day $cur = self.clone;
       my $offset = 0;
-      
+
       if $skip {
 	return gather loop {
 	  my Day $ret = $cur + months($offset++);
@@ -104,6 +104,12 @@ class Gregorian is export {
 	}
       }
     }
+
+    multi method ACCEPTS(Day:D $self: MonthNames $topic){
+      return $self.month == $topic;
+    }
+
+    method MonthNames () { MonthNames($.month) };
   } # class Day
 
   method new(Str $s) is export {

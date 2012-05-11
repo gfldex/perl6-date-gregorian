@@ -36,5 +36,5 @@ my @every_31th := Gregorian.new('2013-01-31').monthly;
 
 .say for @every_31th[1..10];
 
-say $leap_year == January;
-say $leap_year == February;
+say January ~~ $leap_year;
+say February ~~ $leap_year;
