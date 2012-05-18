@@ -105,6 +105,7 @@ class Gregorian is export {
       }
     }
 
+    # January ~~ $birthday
     multi method ACCEPTS(Day:D $self: MonthNames $topic){
       return $self.month == $topic;
     }
@@ -134,6 +135,14 @@ class Gregorian is export {
   sub months(Int $i) is export { Months.new(:month($i)) }
   sub days(Int $i) is export { Days.new(:day($i)) }
 }
+
+# our multi method ACCEPTS(MonthNames:D $self: Gregorian::Day:D $topic){
+#  return $topic.month == $self;
+# }
+
+# $birthday ~~ January;
+MonthNames.^add_method('ACCEPTS', sub (MonthNames:D $self, Gregorian::Day $topic){ return $topic.month == $self } );
+MonthNames.^compose;
 
 sub postfix:<y>(Int $i) is export { return Gregorian::Years.new(:year($i)) }
 sub postfix:<m>(Int $i) is export { return Gregorian::Months.new(:month($i)) }
