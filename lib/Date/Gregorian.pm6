@@ -106,9 +106,7 @@ class Gregorian is export {
     }
 
     # January ~~ $birthday
-    multi method ACCEPTS(Day:D $self: MonthNames $topic){
-      return $self.month == $topic;
-    }
+    multi method ACCEPTS(Day:D $self: MonthNames $topic){ $self.month == $topic }
 
     method MonthNames () { MonthNames($.month) };
   } # class Day
@@ -121,24 +119,23 @@ class Gregorian is export {
 
   class Years {
     has Int $.year;
+    method ACCEPTS(Years:D $self: Day $d){ $self.year == $d.year }
   }
 
   class Months {
     has Int $.month;
+    method ACCEPTS(Months:D $self: Day $d){ $self.month == $d.month }
   }
 
   class Days {
     has Int $.day;
+    method ACCEPTS(Days:D $self: Day $d){ $self.day == $d.day }
   }
 
   sub years(Int $i) is export { Years.new(:year($i)) }
   sub months(Int $i) is export { Months.new(:month($i)) }
   sub days(Int $i) is export { Days.new(:day($i)) }
 }
-
-# our multi method ACCEPTS(MonthNames:D $self: Gregorian::Day:D $topic){
-#  return $topic.month == $self;
-# }
 
 # $birthday ~~ January;
 MonthNames.^add_method('ACCEPTS', sub (MonthNames:D $self, Gregorian::Day $topic){ return $topic.month == $self } );

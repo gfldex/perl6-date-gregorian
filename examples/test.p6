@@ -40,3 +40,7 @@ say January ~~ $leap_year;
 say February ~~ $leap_year;
 say $leap_year ~~ January;
 say $leap_year ~~ February;
+
+say "###";
+say $birthday ~~ 1978y & 3m & 1d;
+say $birthday ~~ 1978y & 2m & 1d;
